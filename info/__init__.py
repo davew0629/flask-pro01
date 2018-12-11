@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from redis import StrictRedis
 from flask_wtf import CSRFProtect
 
-from flask_pro01.config import Config
+from config import Config
 
 # 原来指定session的存储位置(数据库类型)
 from flask_session import Session
