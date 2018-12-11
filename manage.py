@@ -15,7 +15,7 @@ class Config(object):
     SECRET_KEY = ''
     # 为数据库添加配置
     SQLALCHEMY_DATABASE_URI = "mysql://root:mysql@127.0.0.1:3306/information27"
-    SQLALCHEMY_MODIFICATIONS = False
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # redis 配置
     REDIS_HOST = "127.0.0.1"
