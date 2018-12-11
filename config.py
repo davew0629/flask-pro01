@@ -1,6 +1,7 @@
 from redis import StrictRedis
 
-
+import os
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config(object):
     # 项目的配置
@@ -25,24 +26,35 @@ class Config(object):
     PERMANENT_SESSION_LIFETIME = 86400 * 2
 
 
+# 定义配置字典
 class DevelopmentConfig(Config):
-    # 开发环境配置
+    # 开发环境
     DEBUG = True
-
-
-class ProductionConfig(Config):
-    # 生产环境配置
-    DEBUG = False
+    MAIL_SERVER = 'smtp.googlemail.com'
+    MAIL_PORT = 587
+    MAIL_USE_TLS = True
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
+                              'sqlite:///' + os.path.join(basedir, 'data-dev.sqlite')
 
 
 class TestingConfig(Config):
-    # 单元测试环境配置
-    DEBUG = True
+    # 测试环境
     TESTING = True
+    SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or \
+                          'sqlite:///' + os.path.join(basedir, 'data-test.sqlite')
 
-# 定义配置字典
+
+class ProductionConfig(Config):
+    # 生产环境
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+                          'sqlite:///' + os.path.join(basedir, 'data.sqlite')
+
+
 config = {
-    "development": DevelopmentConfig,
-    "production": ProductionConfig,
-    "testing": TestingConfig
+    'development': DevelopmentConfig,
+    'testing': TestingConfig,
+    'production': ProductionConfig,
+    'default': DevelopmentConfig
 }

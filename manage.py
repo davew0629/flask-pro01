@@ -7,17 +7,17 @@ from flask_migrate import Migrate, MigrateCommand
 
 # from .info import app, db
 
-from flask_pro01 import info
+from info import app, db
 
-manager = Manager(info.app)
+manager = Manager(app)
 
 # 将app与db进行关联
-Migrate(info.app, info.db)
+Migrate(app, db)
 # 将迁移命令添加到manager中
 manager.add_command('db', MigrateCommand)
 
 
-@app.route('/')
+@info.app.route('/')
 def index():
     session['name'] = 'itcast'
 
@@ -27,3 +27,4 @@ def index():
 if __name__ == '__main__':
 
     manager.run()
+
