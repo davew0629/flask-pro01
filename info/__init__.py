@@ -6,6 +6,9 @@ from redis import StrictRedis
 from flask_wtf import CSRFProtect
 from config import config
 import logging
+
+
+
 # 原来指定session的存储位置(数据库类型)
 from flask_session import Session
 
@@ -13,6 +16,8 @@ from flask_session import Session
 # flask扩展中可以先初始化扩展的对象，再去调用init——app方法初始化
 db = SQLAlchemy()
 
+redis_store = None  # type:StrictRedis
+# redis_store:StrictRedis = None python3.5 dont support annotations
 
 def setup_log(config_name):
     # 设置日志的记录等级
@@ -40,7 +45,7 @@ def create_app(config_name):
     db.init_app(app)
 
     # 初始化redis存储对象
-
+    global redis_store
     redis_store = StrictRedis(host=config[config_name].REDIS_HOST, port=config[config_name].REDIS_PORT)
 
     # 开启当前项目CSRF保护,只做服务器验证

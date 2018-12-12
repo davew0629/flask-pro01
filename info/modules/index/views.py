@@ -1,11 +1,11 @@
 
-
+from info import redis_store
 from .. import index_blu
 
+print(index_blu)
 
 
-
-@index_blu.route('/index')
+@index_blu.route('/')
 def index():
     # session['name'] = 'itcast'
 
@@ -17,4 +17,5 @@ def index():
 
     # return render()
     # return render_to_response()
+    redis_store.set("name", "itcast")  # 在redis中保存一个值 name itcast
     return 'index page 666'
