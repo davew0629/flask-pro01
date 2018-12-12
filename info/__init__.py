@@ -27,9 +27,6 @@ def setup_log(config_name):
     logging.getLogger().addHandler(file_log_handler)
 
 
-
-
-
 # 类似与工厂方法
 def create_app(config_name):
     setup_log(config_name)
@@ -51,4 +48,6 @@ def create_app(config_name):
     # 设置session保存指定位置
     Session(app)
 
+    from info.modules import index_blu
+    app.register_blueprint(index_blu)
     return app
