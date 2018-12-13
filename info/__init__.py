@@ -1,12 +1,10 @@
 from logging.handlers import RotatingFileHandler
-
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from redis import StrictRedis
 from flask_wtf import CSRFProtect
 from config import config
 import logging
-
 
 
 # 原来指定session的存储位置(数据库类型)
@@ -17,11 +15,12 @@ from flask_session import Session
 db = SQLAlchemy()
 
 redis_store = None  # type:StrictRedis
-# redis_store:StrictRedis = None python3.5 dont support annotations
+# redis_store:StrictRedis = None python3.5 do not support annotations
+
 
 def setup_log(config_name):
     # 设置日志的记录等级
-    logging.basicConfig(level=logging.DEBUG) # 调试debug级
+    logging.basicConfig(level=config[config_name].LOG_LEVEL)  # 调试debug级
     # 创建日志记录器，指明日志保存的路径、每个日志文件的最大大小、保存的日志文件个数上限
     file_log_handler = RotatingFileHandler("logs/log", maxBytes=1024*1024*100, backupCount=10)
     # 创建日志记录的格式 日志等级 输入日志信息的文件名 行数 日志信息
@@ -34,6 +33,7 @@ def setup_log(config_name):
 
 # 类似与工厂方法
 def create_app(config_name):
+    # 创建app对象之前开启日志,传入配置名
     setup_log(config_name)
 
     app = Flask(__name__)
@@ -53,6 +53,6 @@ def create_app(config_name):
     # 设置session保存指定位置
     Session(app)
 
-    from info.modules import index_blu
+    from info.modules.index import index_blu
     app.register_blueprint(index_blu)
     return app

@@ -1,6 +1,6 @@
 
 from info import redis_store
-from .. import index_blu
+from . import index_blu
 
 print(index_blu)
 

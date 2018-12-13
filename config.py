@@ -24,8 +24,10 @@ class Config(object):
     SESSION_PERMANENT = False
     # 设置过期时间
     PERMANENT_SESSION_LIFETIME = 86400 * 2
+
     # 设置日志等级
     LOG_LEVEL = logging.DEBUG
+
 
 # 定义配置字典
 class DevelopmentConfig(Config):
@@ -51,6 +53,7 @@ class ProductionConfig(Config):
     # 生产环境
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
                           'sqlite:///' + os.path.join(basedir, 'data.sqlite')
+    LOG_LEVEL = logging.WARNING
 
 
 config = {
