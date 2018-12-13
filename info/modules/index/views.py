@@ -1,3 +1,4 @@
+from flask import render_template, current_app
 
 from info import redis_store
 from . import index_blu
@@ -18,4 +19,9 @@ def index():
     # return render()
     # return render_to_response()
     redis_store.set("name", "itcast")  # 在redis中保存一个值 name itcast
-    return 'index page 666'
+    # return 'index page 666'
+    return render_template('news/index.html')
+
+@index_blu.route('/favicon.ico')
+def favicon():
+    return current_app.send_static_file('news/favicon.ico')
