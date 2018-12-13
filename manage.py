@@ -1,14 +1,9 @@
-
-from flask import session, current_app, render_template
-import logging
 from flask_script import Manager
-
 from flask_migrate import Migrate, MigrateCommand
-from flask import render_template
 from info import create_app, db
-
+from info import models
 # 通过指定的配置名字创建对应的app
-app = create_app("development")
+app = create_app("default_config")
 manager = Manager(app)
 
 # 将app与db进行关联

@@ -5,7 +5,8 @@ from redis import StrictRedis
 from flask_wtf import CSRFProtect
 from config import config
 import logging
-
+import pymysql
+pymysql.install_as_MySQLdb()
 
 # 原来指定session的存储位置(数据库类型)
 from flask_session import Session
@@ -38,7 +39,7 @@ def create_app(config_name):
 
     app = Flask(__name__)
 
-    app.config.from_object(config["development"])
+    app.config.from_object(config["default_config"])
 
     # db = SQLAlchemy(app)
 
@@ -52,6 +53,7 @@ def create_app(config_name):
     CSRFProtect(app)
     # 设置session保存指定位置
     Session(app)
+
 
     from info.modules.index import index_blu
     app.register_blueprint(index_blu)
