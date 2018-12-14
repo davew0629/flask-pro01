@@ -17,7 +17,7 @@ def get_image_code():
 
     image_code_id = request.args.get("imageCodeId", None)
     if not image_code_id:
-        return abort(404)
+        return abort(403)
     name, text, image = captcha.generate_captcha()
     try:
         redis_store.set("ImageCodeId" + image_code_id, text, constants.IMAGE_CODE_REDIS_EXPIRES)
@@ -27,3 +27,4 @@ def get_image_code():
     response = make_response(image)
     response.headers["Content-Type"] = "image/jpg"
     return response
+
