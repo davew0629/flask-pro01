@@ -3,7 +3,7 @@ from flask import render_template, current_app
 from info import redis_store
 from . import index_blu
 
-print(index_blu)
+
 
 
 @index_blu.route('/')
