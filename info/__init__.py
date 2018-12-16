@@ -35,7 +35,7 @@ def setup_log(config_name):
 # 类似与工厂方法
 def create_app(config_name):
     # 创建app对象之前开启日志,传入配置名
-    # setup_log(config_name)
+    setup_log(config_name)
 
     app = Flask(__name__)
 
@@ -47,7 +47,7 @@ def create_app(config_name):
 
     # 初始化redis存储对象
     global redis_store
-    redis_store = StrictRedis(host=config[config_name].REDIS_HOST, port=config[config_name].REDIS_PORT)
+    redis_store = StrictRedis(host=config[config_name].REDIS_HOST, port=config[config_name].REDIS_PORT, decode_responses=True)
 
     # 开启当前项目CSRF保护,只做服务器验证
     #  CSRFProtect(app)

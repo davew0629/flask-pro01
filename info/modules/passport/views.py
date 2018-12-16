@@ -93,9 +93,13 @@ def get_image_code():
     if not image_code_id:
         return abort(403)
     name, text, image = captcha.generate_captcha()
+    print(name)
+    print(text)
     try:
         redis_store.set("ImageCodeId_" + image_code_id, text, constants.IMAGE_CODE_REDIS_EXPIRES)
+        print("保存到redis数据库")
     except Exception as e:
+
         current_app.logger.error(e)
         abort(500)
     response = make_response(image)
@@ -125,25 +129,25 @@ def send_sms_code():
     print(param_dict)
 
     mobile = param_dict.get("mobile")
-
     image_code = param_dict.get("image_code").upper()
     print("image-code: %s" % image_code)
 
     image_code_id = param_dict.get("image_code_id")
-
+    print(image_code_id)
     # 2. 校验参数(参数是否符合规则，判断是否有值)
     # 判断参数是否有值
     if not all([mobile, image_code, image_code_id]):
         # {"errno": "4100", "errmsg": "参数有误"}
         return jsonify(errno=RET.PARAMERR, errmsg="参数有误")
+
     # 校验手机号是否正确
-    if not re.match('1[35678]\\d{9}', mobile):
+    if not re.match('^(13\d|14[5|7]|15\d|166|17[3|6|7]|18\d)\d{8}$', mobile):
         return jsonify(errno=RET.PARAMERR, errmsg="手机号格式不正确")
     print("手机号格式正确！")
 
     # 3. 先从redis中取出真实的验证码内容
     try:
-        real_image_code = redis_store.get("ImageCodeId_" + image_code_id).decode()
+        real_image_code = redis_store.get("ImageCodeId_" + image_code_id)
         print("real_image_code:%s" % real_image_code)
 
     except Exception as e:
@@ -164,7 +168,6 @@ def send_sms_code():
 
     sms_code_str = "%06d" % random.randint(0, 999999)
 
-
     current_app.logger.debug("短信验证码内容是：%s" % sms_code_str)
     # 6. 发送短信验证码
 
@@ -183,6 +186,7 @@ def send_sms_code():
         return jsonify(errno=RET.DBERR, errmsg="数据保存失败")
 
     # 7. 告知发送结果
+    print("send_sms_code短信发送成功")
     return jsonify(errno=RET.OK, errmsg="发送成功")
 
 
@@ -201,22 +205,31 @@ def register():
     :return:
     """
     # 1. 获取参数
+    print("开始注册，获取注册信息")
     param_dict = request.json
     mobile = param_dict.get("mobile")
     smscode = param_dict.get("smscode")
     password = param_dict.get("password")
+    print(param_dict)
 
+    print("校验参数")
     # 2. 校验参数
     if not all([mobile, smscode, password]):
         return jsonify(errno=RET.PARAMERR, errmsg="参数")
+    print("参数完整，校验手机号...")
+    print(mobile)
 
     # 校验手机号是否正确
     if not re.match('1[35678]\\d{9}', mobile):
         return jsonify(errno=RET.PARAMERR, errmsg="手机号格式不正确")
 
+    print("查询数据库短信验证码")
+
     # 3. 取到服务器保存的真实的短信验证码内容
     try:
         real_sms_code = redis_store.get("SMS_" + mobile)
+        print(smscode)
+        print(real_sms_code)
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg="数据查询失败")
@@ -234,10 +247,17 @@ def register():
     user.nick_name = mobile
     # 记录用户最后一次登录时间
     user.last_login = datetime.now()
+
+
     # TODO 对密码做处理
+    # 设置password的时候进行加密 并给user password_hash赋值
+    user.password = password
+
 
     # 6. 添加到数据库
+    print("添加到mysql数据库")
     try:
+        print(db)
         db.session.add(user)
         db.session.commit()
     except Exception as e:
@@ -246,11 +266,13 @@ def register():
         return jsonify(errno=RET.DBERR, errmsg="数据保存失败")
 
     # 往 session 中保存数据表示当前已经登录
+    print("设置session数据")
     session["user_id"] = user.id
     session["mobile"] = user.mobile
     session["nick_name"] = user.nick_name
 
     # 7. 返回响应
+    print("注册成功")
     return jsonify(errno=RET.OK, errmsg="注册成功")
 
 
@@ -268,6 +290,7 @@ def login():
     """
 
     # 1. 获取参数
+    print("获取登陆参数")
     params_dict = request.json
     mobile = params_dict.get("mobile")
     passport = params_dict.get("passport")
@@ -296,6 +319,7 @@ def login():
         return jsonify(errno=RET.PWDERR, errmsg="用户名或者密码错误")
 
     # 4. 保存用户的登录状态
+    print("保存用户登录状态")
     session["user_id"] = user.id
     session["mobile"] = user.mobile
     session["nick_name"] = user.nick_name
@@ -310,4 +334,5 @@ def login():
         current_app.logger.error(e)
 
     # 5. 响应
+    print("返回响应")
     return jsonify(errno=RET.OK, errmsg="登录成功")
