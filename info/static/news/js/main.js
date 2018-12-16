@@ -110,7 +110,7 @@ $(function(){
     $(".login_form_con").submit(function (e) {
         e.preventDefault()
         var mobile = $(".login_form #mobile").val()
-        var password = $(".login_form #password").val()
+        var passport = $(".login_form #password").val()
 
         if (!mobile) {
             $("#login-mobile-err").show();
@@ -127,11 +127,12 @@ $(function(){
         "mobile": mobile,
         "passport": passport
     }
-        $.ajax({url: "/passport/login",
-        type: "post",
-        contentType: "application/json",
-        data: JSON.stringify(params),
-        success: function (resp) {
+        $.ajax({
+            url: "/passport/login",
+            type: "post",
+            contentType: "application/json",
+            data: JSON.stringify(params),
+            success: function (resp) {
             if (resp.errno == "0") {
                 // 代表登录成功
                 location.reload()
@@ -140,7 +141,8 @@ $(function(){
                 $("#login-password-err").html(resp.errmsg)
                 $("#login-password-err").show()
             }
-        }})
+          }
+        })
 
     })
 

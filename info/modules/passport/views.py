@@ -293,29 +293,31 @@ def login():
     print("获取登陆参数")
     params_dict = request.json
     mobile = params_dict.get("mobile")
+    print(mobile)
     passport = params_dict.get("passport")
-
+    print(passport)
     # 2. 校验参数
     if not all([mobile, passport]):
         return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
-
+    print("校验手机号")
     # 校验手机号是否正确
     if not re.match('1[35678]\\d{9}', mobile):
         return jsonify(errno=RET.PARAMERR, errmsg="手机号格式不正确")
-
+    print("校验密码")
     # 3. 校验密码是否正确
     # 先查询出当前是否有指定手机号的用户
     try:
         user = User.query.filter(User.mobile == mobile).first()
+        print(user, type(user))
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg="数据查询错误")
     # 判断用户是否存在
     if not user:
         return jsonify(errno=RET.NODATA, errmsg="用户不存在")
-
+    print("存在该用户")
     # 校验登录的密码和当前用户的密码是否一致
-    if not user.check_password(passport):
+    if not user.check_passoword(passport):
         return jsonify(errno=RET.PWDERR, errmsg="用户名或者密码错误")
 
     # 4. 保存用户的登录状态
@@ -334,5 +336,5 @@ def login():
         current_app.logger.error(e)
 
     # 5. 响应
-    print("返回响应")
+    print("登录成功， 返回响应")
     return jsonify(errno=RET.OK, errmsg="登录成功")

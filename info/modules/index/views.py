@@ -22,6 +22,7 @@ def index():
     # redis_store.set("name", "itcast")  # 在redis中保存一个值 name itcast
     # return 'index page 666'
 
+    # 如果用户已经登录，将当前登录用户的数据传到模板中显示
 
     user_id = session.get('user_id', None)
     user = None
@@ -31,14 +32,12 @@ def index():
         except Exception as e:
             current_app.logger.error(e)
 
-
     data = {
-        "user":user.to_dict() if user else None
+        "user": user.to_dict() if user else None
     }
 
-
-
     return render_template('news/index.html', data=data)
+
 
 @index_blu.route('/favicon.ico')
 def favicon():
