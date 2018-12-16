@@ -110,26 +110,6 @@ $(function(){
         }
 
         // 发起登录请求
-        var params = {
-        "mobile": mobile,
-        "passport": passport
-    }
-
-    $.ajax({
-        url: "/passport/login",
-        type: "post",
-        contentType: "application/json",
-        data: JSON.stringify(params),
-        success: function (resp) {
-            if (resp.errno == "0") {
-                // 代表登录成功
-                location.reload()
-            }else {
-                alert(resp.errmsg)
-                $("#login-password-err").html(resp.errmsg)
-                $("#login-password-err").show()
-            }
-        }
     })
 
 
@@ -164,29 +144,6 @@ $(function(){
         }
 
         // 发起注册请求
-        // 准备参数
-        var params = {
-            "mobile": mobile,
-            "smscode": smscode,
-            "password": password
-        }
-
-        $.ajax({
-            url: "/passport/register",
-            type: "post",
-            contentType: "application/json",
-            data: JSON.stringify(params),
-            success: function (resp) {
-                if (resp.errno == "0") {
-                    // 代表注册成功
-                    location.reload()
-                }else {
-                    // 代表注册失败
-                    alert(resp.errmsg)
-                    $("#register-password-err").html(resp.errmsg)
-                    $("#register-password-err").show()
-                }
-            }
 
     })
 })
@@ -223,14 +180,11 @@ function sendSMSCode() {
     }
 
     // TODO 发送短信验证码
-    // 发送短信验证码
     var params = {
         "mobile": mobile,
         "image_code":imageCode,
         "image_code_id": imageCodeId
     }
-
-    // 发起注册请求
     $.ajax({
         // 请求地址
         url: "/passport/sms_code",
@@ -255,19 +209,18 @@ function sendSMSCode() {
                         $(".get_code").html("点击获取验证码")
                         // 添加点击事件
                         $(".get_code").attr("onclick", "sendSMSCode();");
-                    }else {
+                    } else {
                         num -= 1
                         // 设置 a 标签显示的内容
                         $(".get_code").html(num + "秒")
                     }
                 }, 1000)
-            }else {
+            } else {
                 // 代表发送失败
                 alert(response.errmsg)
                 $(".get_code").attr("onclick", "sendSMSCode();");
             }
         }
-
     })
 }
 

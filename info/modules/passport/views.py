@@ -84,7 +84,10 @@ def get_image_code():
     # 3 生成图片验证码  使用三个参数接收
     # 4 保存图片验证码文字内容到redis
     # 5 返回验证码图片，并设置数据类型，以便浏览器识别其类型
-    print(request.args)
+    print("准备获取图片验证码")
+    # print("request.args=" + request.args)
+    # print(request.host, request.url, request.method, request.headers)
+
     image_code_id = request.args.get("imageCodeId", None)
 
     if not image_code_id:
