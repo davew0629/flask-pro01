@@ -35,7 +35,7 @@ def setup_log(config_name):
 # 类似与工厂方法
 def create_app(config_name):
     # 创建app对象之前开启日志,传入配置名
-    setup_log(config_name)
+    # setup_log(config_name)
 
     app = Flask(__name__)
 
@@ -50,7 +50,7 @@ def create_app(config_name):
     redis_store = StrictRedis(host=config[config_name].REDIS_HOST, port=config[config_name].REDIS_PORT)
 
     # 开启当前项目CSRF保护,只做服务器验证
-    CSRFProtect(app)
+    #  CSRFProtect(app)
     # 设置session保存指定位置
     Session(app)
 
@@ -59,4 +59,5 @@ def create_app(config_name):
     app.register_blueprint(index_blu)
     from info.modules.passport import passport_blu
     app.register_blueprint(passport_blu)
+
     return app

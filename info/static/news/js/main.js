@@ -47,15 +47,6 @@ $(function(){
 		}
 	})
 
-//     $('.form_group').on('click',function(){
-//     $(this).children('input').focus()
-// })
-//
-// $('.form_group input').on('focusin',function(){
-//     $(this).siblings('.input_tip').animate({'top':-5,'font-size':12},'fast')
-//     $(this).parent().addClass('hotline');
-// })
-
 
 	// 打开注册框
 	$('.register_btn').click(function(){
@@ -119,6 +110,26 @@ $(function(){
         }
 
         // 发起登录请求
+        var params = {
+        "mobile": mobile,
+        "passport": passport
+    }
+
+    $.ajax({
+        url: "/passport/login",
+        type: "post",
+        contentType: "application/json",
+        data: JSON.stringify(params),
+        success: function (resp) {
+            if (resp.errno == "0") {
+                // 代表登录成功
+                location.reload()
+            }else {
+                alert(resp.errmsg)
+                $("#login-password-err").html(resp.errmsg)
+                $("#login-password-err").show()
+            }
+        }
     })
 
 
@@ -153,6 +164,29 @@ $(function(){
         }
 
         // 发起注册请求
+        // 准备参数
+        var params = {
+            "mobile": mobile,
+            "smscode": smscode,
+            "password": password
+        }
+
+        $.ajax({
+            url: "/passport/register",
+            type: "post",
+            contentType: "application/json",
+            data: JSON.stringify(params),
+            success: function (resp) {
+                if (resp.errno == "0") {
+                    // 代表注册成功
+                    location.reload()
+                }else {
+                    // 代表注册失败
+                    alert(resp.errmsg)
+                    $("#register-password-err").html(resp.errmsg)
+                    $("#register-password-err").show()
+                }
+            }
 
     })
 })
@@ -161,18 +195,17 @@ var imageCodeId = ""
 
 // TODO 生成一个图片验证码的编号，并设置页面中图片验证码img标签的src属性
 function generateImageCode() {
-    //浏览器发起图片验证码请求/image_code?imageCodeId=xxxx
+    // 浏览器要发起图片验证码请求/image_code?imageCodeId=xxxxx
     imageCodeId = generateUUID()
-    // 生成url
+    // 生成 url
     var url = "/passport/image_code?imageCodeId=" + imageCodeId
-    //给指定img标签设置src属性
+    // 给指定img标签设置src,设置了地址之后，img标签就会去向这个地址发起请求，请求图片
     $(".get_pic_code").attr("src", url)
 }
 
 // 发送短信验证码
 function sendSMSCode() {
     // 校验参数，保证输入框有数据填写
-    //移除点击获取验证码事件，保证倒计时的执行
     $(".get_code").removeAttr("onclick");
     var mobile = $("#register_mobile").val();
     if (!mobile) {
@@ -190,43 +223,51 @@ function sendSMSCode() {
     }
 
     // TODO 发送短信验证码
+    // 发送短信验证码
     var params = {
-        "mobile":mobile,
+        "mobile": mobile,
         "image_code":imageCode,
-        "image_code_id":imageCodeId
+        "image_code_id": imageCodeId
     }
+
     // 发起注册请求
     $.ajax({
-        //请求地址
-        url:"/passport/sms_code",
-        type:"POST",
-        data:JSON.stringify(params),
-        content_type:"application/json",
-        success:function (response) {
-            if(response.errno =="0"){
-                //发送成功
+        // 请求地址
+        url: "/passport/sms_code",
+        // 请求方式
+        type: "post",
+        // 请求参数
+        data: JSON.stringify(params),
+        // 请求参数的数据类型
+        contentType: "application/json",
+        success: function (response) {
+            if (response.errno == "0") {
+                // 代表发送成功
                 var num = 60
                 var t = setInterval(function () {
-                    if (num == 1){
-                        //代表倒计时结束
-                        //清除计时器
+
+                    if (num == 1) {
+                        // 代表倒计时结束
+                        // 清除倒计时
                         clearInterval(t)
-                        //设置显示内容
+
+                        // 设置显示内容
                         $(".get_code").html("点击获取验证码")
-                        //
+                        // 添加点击事件
                         $(".get_code").attr("onclick", "sendSMSCode();");
-                    }else{
+                    }else {
                         num -= 1
                         // 设置 a 标签显示的内容
                         $(".get_code").html(num + "秒")
                     }
                 }, 1000)
-            }else{
+            }else {
                 // 代表发送失败
                 alert(response.errmsg)
                 $(".get_code").attr("onclick", "sendSMSCode();");
             }
         }
+
     })
 }
 
