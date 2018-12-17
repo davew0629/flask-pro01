@@ -94,7 +94,7 @@ def index():
         news_list = News.query.order_by(News.clicks.desc()).limit(constants.CLICK_RANK_MAX_NEWS)
         print("已获取新闻排行 按照点击量降序排列")
 
-    except Exception as e :
+    except Exception as e:
         current_app.logger.error(e)
 
     news_dict_li = []
