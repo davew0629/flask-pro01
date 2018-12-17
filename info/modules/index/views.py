@@ -1,7 +1,7 @@
 from flask import render_template, current_app, session, request, jsonify
 
 from info import redis_store, constants
-from info.models import User, News
+from info.models import User, News, Category
 from info.utils.response_code import RET
 from . import index_blu
 
@@ -9,10 +9,12 @@ from . import index_blu
 @index_blu.route('/news_list')
 def news_list():
     # 获取首页新闻数据
-    cid  = request.args.get("cid", "1")
+    print("准备获取首页新闻数据")
+    cid = request.args.get("cid", "1")
     page = request.args.get("page", "1")
     per_page = request.args.get("perpage", "10")
 
+    print(cid, page, per_page)
     try:
         cid = int(cid)
         page = int(page)
@@ -27,7 +29,8 @@ def news_list():
 
     # 查询数据，按照过滤器规则，时间顺序降序，分页查询
     try:
-        paginate = News.query.filter(*filters).order_by(News.create_time.desc()).paginate(page, per_page)
+        paginate = News.query.filter(*filters).order_by(News.create_time.desc()).paginate(page, per_page, False)
+        print(paginate)
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg="数据查询错误")
@@ -37,16 +40,18 @@ def news_list():
     total_page = paginate.pages
     current_page = paginate.page
 
+    print(total_page, current_page, news_list_model)
     # new_dict_li 是字典列表
     news_dict_li = []
     for news in news_list_model:
         news_dict_li.append(news.to_basic_dict())
 
     data = {
-        "total_page":total_page,
+        "total_page": total_page,
         "current_page": current_page,
         "news_dict_li": news_dict_li
     }
+    print("准备返回json数据到前端页面")
     return jsonify(errno=RET.OK, errmsg="OK", data=data)
 
 
@@ -64,6 +69,12 @@ def index():
     # return render_to_response()
     # redis_store.set("name", "itcast")  # 在redis中保存一个值 name itcast
     # return 'index page 666'
+
+    # 查询分类数据 并通过模板渲染
+    categories = Category.query.all()
+    category_li = []
+    for category in categories:
+        category_li.append(category.to_dict())
 
     # 如果用户已经登录，将当前登录用户的数据传到模板中显示
 
@@ -93,7 +104,8 @@ def index():
 
     data = {
         "user": user.to_dict() if user else None,
-        "news_dict_li":news_dict_li
+        "news_dict_li":news_dict_li,
+        "category_li": category_li
     }
 
     return render_template('news/index.html', data=data)
