@@ -14,6 +14,15 @@ from . import passport_blu
 from info.utils.captcha.captcha import captcha
 
 
+@passport_blu.route('/logout')
+def logout():
+    # 清除session的数据 退出登录
+    session.pop('user_id', None)
+    session.pop('nick_name', None)
+    session.pop('mobile', None)
+    return jsonify(errno=RET.OK, errmsg="退出成功")
+
+
 #
 # @passport_blu.route('/register', methods=['POST'])
 # def register():
@@ -329,11 +338,13 @@ def login():
     # 设置当前用户最后一次登录的时间
     user.last_login = datetime.now()
 
-    try:
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        current_app.logger.error(e)
+    # 此处在视图函数中对模型属性的修改需要commit到数据库
+    # 对SQLALCHEMY中进行配置后可以不用以下代码
+    # try:
+    #     db.session.commit()
+    # except Exception as e:
+    #     db.session.rollback()
+    #     current_app.logger.error(e)
 
     # 5. 响应
     print("登录成功， 返回响应")

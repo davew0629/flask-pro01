@@ -131,6 +131,10 @@ $(function(){
             url: "/passport/login",
             type: "post",
             contentType: "application/json",
+            //在headers中添加csrf-token
+            headers:{
+              "X-CSRFToken": getCookie('csrf_token')
+            },
             data: JSON.stringify(params),
             success: function (resp) {
             if (resp.errno == "0") {
@@ -279,6 +283,15 @@ function sendSMSCode() {
         }
     })
 }
+
+
+function logout() {
+    $.get('/passport/logout', function (resp) {
+        location.reload()
+    })
+
+}
+
 
 // 调用该函数模拟点击左侧按钮
 function fnChangeMenu(n) {
