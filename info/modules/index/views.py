@@ -30,7 +30,7 @@ def news_list():
     # 查询数据，按照过滤器规则，时间顺序降序，分页查询
     try:
         paginate = News.query.filter(*filters).order_by(News.create_time.desc()).paginate(page, per_page, False)
-        print(paginate)
+
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg="数据查询错误")
