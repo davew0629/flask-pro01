@@ -17,8 +17,11 @@ def do_index_class(index):
     else:
         return ""
 
+
 def user_login_data(f):
     @functools.wraps(f)
+    # 使用该工具可以在装饰过程中保持被装饰函数的__name__属性不变
+    # 原因：在同一模块下被装饰器函数装饰的函数会被赋予相同的装饰器名字wrapper
     def warrper(*args, **kwargs):
         user_id = session.get("user_id", None)
         user = None

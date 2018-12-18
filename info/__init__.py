@@ -61,7 +61,6 @@ def create_app(config_name):
     from info.utils.common import do_index_class
     app.add_template_filter(do_index_class, "index_class")
 
-
     @app.after_request
     def after_request(response):
         # print("调用方法生成csrf_token")
@@ -70,7 +69,6 @@ def create_app(config_name):
         response.set_cookie("csrf_token", csrf_token)
         return response
 
-
     # 注册蓝图
     from info.modules.index import index_blu
     app.register_blueprint(index_blu)
@@ -78,6 +76,5 @@ def create_app(config_name):
     app.register_blueprint(passport_blu)
     from info.modules.news import news_blu
     app.register_blueprint(news_blu)
-
 
     return app
