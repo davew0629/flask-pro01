@@ -2,6 +2,7 @@ from flask import render_template, current_app, session, request, jsonify
 
 from info import redis_store, constants
 from info.models import User, News, Category
+from info.utils.common import user_login_data
 from info.utils.response_code import RET
 from . import index_blu
 
@@ -40,7 +41,7 @@ def news_list():
     total_page = paginate.pages
     current_page = paginate.page
 
-    print(total_page, current_page, news_list_model)
+    # print(total_page, current_page, news_list_model)
     # new_dict_li 是字典列表
     news_dict_li = []
     for news in news_list_model:
@@ -56,6 +57,7 @@ def news_list():
 
 
 @index_blu.route('/')
+@user_login_data
 def index():
     # session['name'] = 'itcast'
 
@@ -104,7 +106,7 @@ def index():
 
     data = {
         "user": user.to_dict() if user else None,
-        "news_dict_li":news_dict_li,
+        "news_dict_li": news_dict_li,
         "category_li": category_li
     }
 
