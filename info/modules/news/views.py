@@ -6,6 +6,50 @@ from info.utils.response_code import RET
 from . import news_blu
 
 
+@news_blu.route('/followed_user', methods=["POST"])
+@user_login_data
+def followed_user():
+    user = g.user
+    if not user:
+        return jsonify(errno=RET.SESSIONERR, errmsg="未登录")
+
+    user_id = request.json.get("user_id")
+    action = request.json.get("action")
+
+    # 判断参数
+    if not all([user_id, action]):
+        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+
+    if action not in("follow", "unfollow"):
+        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+
+    # 获取要被关注的用户
+    try:
+        other = User.query.get(user_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据查询错误")
+
+    if not other:
+        return jsonify(errno=RET.NODATA, errmsg="未查询到数据")
+
+    # 根据要执行的操作去修改对应的数据
+    if action == "follow":
+        if other not in user.followed:
+            # 当前用户的关注列表添加一个值
+            user.followed.append(other)
+        else:
+            return jsonify(errno=RET.DATAEXIST, errmsg="当前用户已被关注")
+    else:
+        # 取消关注
+        if other in user.followed:
+            user.followed.remove(other)
+        else:
+            return jsonify(errno=RET.DATAEXIST, errmsg="当前用户未被关注")
+
+    return jsonify(errno=RET.OK, errmsg="操作成功")
+
+
 @news_blu.route('/comment_like', methods=["POST"])
 @user_login_data
 def comment_like():
@@ -133,6 +177,8 @@ def news_detail(news_id):
     # 定义变量作为是否收藏的标记
     is_collected = False
 
+    is_followed = False
+
     # 查询用户登陆信息
     # user = query_user_data()
     user = g.user
@@ -161,6 +207,7 @@ def news_detail(news_id):
     # 更新新闻的点击次数
     news.clicks += 1
     print("news.clicks: %d" % news.clicks)
+
     if user:
         # sqlalchemy会在使用的时候自动加载
         if news in user.collection_news:
@@ -195,12 +242,19 @@ def news_detail(news_id):
         #     comment_dict["is_like"] = True
         comment_dict_li.append(comment_dict)
 
+    # 如果当前新闻有作者，并且当前登录用户已关注过这个用户
+    if news.user and user:
+        if news.user in user.followed:
+            is_followed = True
+
+
     data = {
         "news": news.to_dict(),
         "user": user.to_dict() if user else None,
         "news_dict_li": news_dict_li,
         "is_collected": is_collected,
-        "comments": comment_dict_li
+        "comments": comment_dict_li,
+        "is_followed": is_followed
     }
     print("准备返回news_detail/news_id页面")
     print(news)
