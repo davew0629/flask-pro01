@@ -46,6 +46,7 @@ def comment_like():
         return jsonify(errno=RET.NODATA, errmsg="评论不存在")
 
     if action == "add":
+        # 添加评论
         comment_like_model = CommentLike.query.filter(CommentLike.user_id == user.id,
                                                       CommentLike.comment_id == comment.id).first()
         if not comment_like_model:
