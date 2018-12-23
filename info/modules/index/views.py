@@ -25,6 +25,7 @@ def news_list():
         return jsonify(errno=RET.PARAMERR, errmsg="参数")
 
     filters = []
+    # 如果查询的不是最新的数据 需要添加条件
     if cid != 1:
         filters.append(News.category_id == cid)
 

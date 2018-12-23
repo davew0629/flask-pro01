@@ -13,6 +13,9 @@ body{
     margin:0px auto;
 }
 
+.f1 {
+    float:left;
+}
 .logo{
     width:140px;
     height:33px;

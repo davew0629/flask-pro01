@@ -33,9 +33,10 @@ $(function(){
 
 
 	// 点击输入框，提示文字上移
-	$('.form_group').on('click focusin',function(){
-		$(this).children('.input_tip').animate({'top':-5,'font-size':12},'fast').siblings('input').focus().parent().addClass('hotline');
-	})
+	// $('.form_group').on('click focusin',function(){
+	// 	$(this).children('.input_tip').animate({'top':-5,'font-size':12},'fast').siblings('input').focus().parent().addClass('hotline');
+	// })
+
 
 
     $('.form_group').on('click',function(){
@@ -46,8 +47,6 @@ $(function(){
     $(this).siblings('.input_tip').animate({'top':-5,'font-size':12},'fast')
     $(this).parent().addClass('hotline');
     })
-
-
 
 
 	// 输入框失去焦点，如果输入框为空，则提示文字下移
@@ -126,7 +125,7 @@ $(function(){
         var params = {
         "mobile": mobile,
         "passport": passport
-    }
+        }
         $.ajax({
             url: "/passport/login",
             type: "post",
@@ -193,6 +192,9 @@ $(function(){
             type: "post",
             contentType: "application/json",
             data: JSON.stringify(params),
+            headers:{
+                "X-CSRFToken": getCookie('csrf_token')
+            },
             success: function (resp) {
                 if (resp.errno == "0") {
                     // 代表注册成功
@@ -203,7 +205,8 @@ $(function(){
                     $("#register-password-err").html(resp.errmsg)
                     $("#register-password-err").show()
                 }
-            }})
+            }
+        })
 
     })
 })
@@ -254,6 +257,9 @@ function sendSMSCode() {
         data: JSON.stringify(params),
         // 请求参数的数据类型
         contentType: "application/json",
+        headers:{
+            "X-CSRFToken": getCookie('csrf_token')
+        },
         success: function (response) {
             if (response.errno == "0") {
                 // 代表发送成功
