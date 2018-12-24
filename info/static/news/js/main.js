@@ -293,10 +293,8 @@ function sendSMSCode() {
 
 function logout() {
     $.get('/passport/logout', function (resp) {
-        alert("用户退出，刷新页面")
         location.reload()
     })
-
 }
 
 

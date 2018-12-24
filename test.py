@@ -10,7 +10,7 @@ from manage import app
 def add_test_users():
     users = []
     now = datetime.datetime.now()
-    for num in range(0, 10000):
+    for num in range(10000,100000):
         try:
             user = User()
             user.nick_name = "%011d" % num
@@ -26,6 +26,7 @@ def add_test_users():
         db.session.add_all(users)
         db.session.commit()
     print('OK')
+
 
 if __name__ == '__main__':
     add_test_users()

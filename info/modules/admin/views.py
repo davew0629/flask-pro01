@@ -11,7 +11,7 @@ from info.utils.image_storage import storage
 from info.utils.response_code import RET
 
 
-@admin_blu.route('/news_type', methods=["POST","GET"])
+@admin_blu.route('/news_type', methods=["POST", "GET"])
 def news_type():
     if request.method == "GET":
         try:
@@ -312,9 +312,11 @@ def user_list():
     print(total_page)
     return render_template('admin/user_list.html', data=data)
 
+
 @admin_blu.route('/user_count')
 def user_count():
     # 总人数
+    print("开始调用user—count方法")
     total_count = 0
     try:
         total_count = User.query.filter(User.is_admin == False).count()
@@ -332,7 +334,7 @@ def user_count():
     except Exception as e:
         current_app.logger.error(e)
 
-    #日新增数
+    # 日新增数
     day_count = 0
     begin_day_date = datetime.strptime(('%d-%02d-%02d' % (t.tm_year, t.tm_mon, t.tm_mday)), "%Y-%m-%d")
     try:
@@ -354,8 +356,7 @@ def user_count():
         begin_date = today_date - timedelta(days=i)
         # 取下一天的0点0分
         end_date = today_date - timedelta(days=(i-1))
-        count = User.query.filter(User.is_admin == False, User.last_login >= begin_date,
-                                  User.last_login < end_date).count()
+        count = User.query.filter(User.is_admin == False, User.last_login >= begin_date, User.last_login < end_date).count()
         active_count.append(count)
         active_time.append(begin_date.strftime('%Y-%m-%d'))
 
@@ -393,9 +394,11 @@ def login():
             return redirect(url_for('admin.index'))
         return render_template('admin/login.html')
 
+    # 获取登录参数
     username = request.form.get("username")
     password = request.form.get("password")
 
+    # 参数判断
     if not all([username, password]):
         return render_template('admin/login.html', errmsg="参数错误")
 
@@ -404,6 +407,9 @@ def login():
     except Exception as e:
         current_app.logger.error(e)
         return render_template('admin/login.html', errmsg="用户信息查询失败")
+
+    if not user:
+        return render_template('admin/login.html', errmsg="未查询到用户信息")
 
     if not user.check_passoword(password):
         return render_template('admin/login.html', errmsg="用户名或者密码错误")
@@ -414,3 +420,14 @@ def login():
     session["is_admin"] = user.is_admin
 
     return redirect(url_for('admin.index'))
+
+
+@admin_blu.route('/logout')
+def logout():
+    # 清除session的数据 退出登录，如果要移除的key不存在返回none
+    session.pop('user_id', None)
+    session.pop('nick_name', None)
+    session.pop('mobile', None)
+    session.pop('is_admin', None)
+    return redirect(url_for("admin.login"))
+    # return jsonify(errno=RET.OK, errmsg="退出成功")

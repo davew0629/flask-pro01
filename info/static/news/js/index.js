@@ -106,7 +106,6 @@ function updateNewsData() {
 
             }else
             {
-
             //请求失败
             alert(resp.errmsg)
             }

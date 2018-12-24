@@ -10,7 +10,6 @@ from . import index_blu
 @index_blu.route('/news_list')
 def news_list():
     # 获取首页新闻数据
-    print("准备获取首页新闻数据")
     cid = request.args.get("cid", "1")
     page = request.args.get("page", "1")
     per_page = request.args.get("perpage", "10")
@@ -53,7 +52,6 @@ def news_list():
         "current_page": current_page,
         "news_dict_li": news_dict_li
     }
-    print("准备返回json数据到前端页面")
     return jsonify(errno=RET.OK, errmsg="OK", data=data)
 
 
@@ -91,12 +89,9 @@ def index():
 
     # 显示右侧新闻排行
     news_list = []
-
     print("准备获取新闻排行数据")
     try:
         news_list = News.query.order_by(News.clicks.desc()).limit(constants.CLICK_RANK_MAX_NEWS)
-        print("已获取新闻排行 按照点击量降序排列")
-
     except Exception as e:
         current_app.logger.error(e)
 

@@ -1,10 +1,7 @@
-import json
 import random
 import re
 from datetime import datetime
-
 from flask import request, abort, current_app, make_response, jsonify, session, json
-
 from info import redis_store, constants, db
 from info.lib.yuntongxun.sms import CCP
 from info.models import User
@@ -14,77 +11,15 @@ from . import passport_blu
 from info.utils.captcha.captcha import captcha
 
 
-@passport_blu.route('/logout', methods=['POST'])
+@passport_blu.route('/logout')
 def logout():
-    # 清除session的数据 退出登录
+    # 清除session的数据 退出登录，如果要移除的key不存在返回none
     session.pop('user_id', None)
     session.pop('nick_name', None)
     session.pop('mobile', None)
     session.pop('is_admin', None)
     return jsonify(errno=RET.OK, errmsg="退出成功")
 
-
-#
-# @passport_blu.route('/register', methods=['POST'])
-# def register():
-#     """
-#     1,获取参数
-#     2，校验参数
-#     3，取到服务器保存的真实的短信验证码内容
-#     4，校验用户输入的短信验证码内容和真实验证码内容是否一致
-#     5，如果一致 初始化user模型并且赋值属性
-#     6，将user模型添加到数据库
-#     7，返回响应
-#
-#     :return:
-#     """
-#     print("准备进行注册，提取信息")
-#     param_dict = request.json
-#     mobile = param_dict.get("mobile")
-#     smscode = param_dict.get("smscode")
-#     password = param_dict.get("password")
-#
-#     if not all([mobile, smscode, password]):
-#         return jsonify(errno=RET.PARAMERR, errmsg="参数")
-#
-#     if not re.match('1[35678]\\d{9}', mobile):
-#         return jsonify(error=RET.PARAMERR,errmsg="手机号格式不正确")
-#
-#     try:
-#         real_sms_code = redis_store.get("SMS_" + mobile)
-#     except Exception as e:
-#         current_app.logger.error(e)
-#         return jsonify(error=RET.DBERR, errmsg="数据查询失败")
-#
-#     if not real_sms_code:
-#         return jsonify(error=RET.NODATA, errmsg="验证码已过期")
-#
-#     if real_sms_code != smscode:
-#         return jsonify(error=RET.DATAERR, errmsg="验证码输入错误")
-#
-#     user= User()
-#     user.mobile = mobile
-#     # 暂时代替昵称。此时用户尚未输入昵称
-#     user.nick_name = mobile
-#     # 记录用户最后一次登陆时间。注册完毕即进行登陆
-#     user.last_login = datetime.now()
-#     # TODO 对密码进行处理
-#
-#     try:
-#         db.session.add(user)
-#         db.session.commit()
-#     except Exception as e:
-#         current_app.logger.error(e)
-#         db.session.rollback()
-#         return jsonify(errnp=RET.DBERR, errmsg="数据保存失败")
-#
-#     session["user_id"] = user.id
-#     session["mobile"] = user.mobile
-#     session["nick_name"] = user.nick_name
-#
-#     return jsonify(errno=RET.OK, errmsg="注册成功！")
-#
-#
 
 @passport_blu.route('/image_code')
 def get_image_code():
@@ -94,17 +29,14 @@ def get_image_code():
     # 3 生成图片验证码  使用三个参数接收
     # 4 保存图片验证码文字内容到redis
     # 5 返回验证码图片，并设置数据类型，以便浏览器识别其类型
-    print("准备获取图片验证码")
-    # print("request.args=" + request.args)
-    # print(request.host, request.url, request.method, request.headers)
+    print("准备调用get_iamge_code")
 
     image_code_id = request.args.get("imageCodeId", None)
 
     if not image_code_id:
         return abort(403)
     name, text, image = captcha.generate_captcha()
-    print(name)
-    print(text)
+
     try:
         redis_store.set("ImageCodeId_" + image_code_id, text, constants.IMAGE_CODE_REDIS_EXPIRES)
         print("保存到redis数据库")
@@ -136,14 +68,12 @@ def send_sms_code():
     # params_dict = json.loads(request.data)
     print("准备接收图片验证码参数---用于获取用户输入参数")
     param_dict = request.json
-    print(param_dict)
 
     mobile = param_dict.get("mobile")
     image_code = param_dict.get("image_code").upper()
-    print("image-code: %s" % image_code)
 
     image_code_id = param_dict.get("image_code_id")
-    print(image_code_id)
+
     # 2. 校验参数(参数是否符合规则，判断是否有值)
     # 判断参数是否有值
     if not all([mobile, image_code, image_code_id]):
@@ -153,7 +83,6 @@ def send_sms_code():
     # 校验手机号是否正确
     if not re.match('^(13\d|14[5|7]|15\d|166|17[3|6|7]|18\d)\d{8}$', mobile):
         return jsonify(errno=RET.PARAMERR, errmsg="手机号格式不正确")
-    print("手机号格式正确！")
 
     # 3. 先从redis中取出真实的验证码内容
     try:
@@ -161,12 +90,10 @@ def send_sms_code():
         print("real_image_code:%s" % real_image_code)
 
     except Exception as e:
-        print("添加到错误日志")
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg="数据查询失败")
 
     if not real_image_code:
-        print("没有获得验证码id")
         return jsonify(errno=RET.NODATA, errmsg="图片验证码已过期")
 
     # 4. 与用户的验证码内容进行对比，如果对比不一致，那么返回验证码输入错误
@@ -183,7 +110,6 @@ def send_sms_code():
 
     print(mobile, sms_code_str)
     result = CCP().send_template_sms(mobile, [sms_code_str, constants.SMS_CODE_REDIS_EXPIRES / 5], 1)
-    print("result %s " % result)
     if result != 0:
         # 代表发送不成功
         return jsonify(errno=RET.THIRDERR, errmsg="发送短信失败")
@@ -196,9 +122,7 @@ def send_sms_code():
         return jsonify(errno=RET.DBERR, errmsg="数据保存失败")
 
     # 7. 告知发送结果
-    print("send_sms_code短信发送成功")
     return jsonify(errno=RET.OK, errmsg="发送成功")
-
 
 
 @passport_blu.route('/register', methods=["POST"])
@@ -220,20 +144,14 @@ def register():
     mobile = param_dict.get("mobile")
     smscode = param_dict.get("smscode")
     password = param_dict.get("password")
-    print(param_dict)
 
-    print("校验参数")
     # 2. 校验参数
     if not all([mobile, smscode, password]):
         return jsonify(errno=RET.PARAMERR, errmsg="参数")
-    print("参数完整，校验手机号...")
-    print(mobile)
 
     # 校验手机号是否正确
     if not re.match('1[35678]\\d{9}', mobile):
         return jsonify(errno=RET.PARAMERR, errmsg="手机号格式不正确")
-
-    print("查询数据库短信验证码")
 
     # 3. 取到服务器保存的真实的短信验证码内容
     try:
@@ -258,16 +176,12 @@ def register():
     # 记录用户最后一次登录时间
     user.last_login = datetime.now()
 
-
-    # TODO 对密码做处理
+    # 对密码做处理
     # 设置password的时候进行加密 并给user password_hash赋值
     user.password = password
 
-
     # 6. 添加到数据库
-    print("添加到mysql数据库")
     try:
-        print(db)
         db.session.add(user)
         db.session.commit()
     except Exception as e:
@@ -276,7 +190,6 @@ def register():
         return jsonify(errno=RET.DBERR, errmsg="数据保存失败")
 
     # 往 session 中保存数据表示当前已经登录
-    print("设置session数据")
     session["user_id"] = user.id
     session["mobile"] = user.mobile
     session["nick_name"] = user.nick_name
@@ -284,7 +197,6 @@ def register():
     # 7. 返回响应
     print("注册成功")
     return jsonify(errno=RET.OK, errmsg="注册成功")
-
 
 
 @passport_blu.route('/login', methods=["POST"])
@@ -300,38 +212,30 @@ def login():
     """
 
     # 1. 获取参数
-    print("获取登陆参数")
     params_dict = request.json
     mobile = params_dict.get("mobile")
-    print(mobile)
     passport = params_dict.get("passport")
-    print(passport)
     # 2. 校验参数
     if not all([mobile, passport]):
         return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
-    print("校验手机号")
     # 校验手机号是否正确
     if not re.match('1[35678]\\d{9}', mobile):
         return jsonify(errno=RET.PARAMERR, errmsg="手机号格式不正确")
-    print("校验密码")
     # 3. 校验密码是否正确
     # 先查询出当前是否有指定手机号的用户
     try:
         user = User.query.filter(User.mobile == mobile).first()
-        print(user, type(user))
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg="数据查询错误")
     # 判断用户是否存在
     if not user:
         return jsonify(errno=RET.NODATA, errmsg="用户不存在")
-    print("存在该用户")
     # 校验登录的密码和当前用户的密码是否一致
     if not user.check_passoword(passport):
         return jsonify(errno=RET.PWDERR, errmsg="用户名或者密码错误")
 
     # 4. 保存用户的登录状态
-    print("保存用户登录状态")
     session["user_id"] = user.id
     session["mobile"] = user.mobile
     session["nick_name"] = user.nick_name
