@@ -4,9 +4,63 @@ import time
 from flask import render_template, request, current_app, session, g, redirect, url_for
 
 from info import constants
-from info.models import User
+from info.models import User, News
 from info.modules.admin import admin_blu
 from info.utils.common import user_login_data
+
+
+@admin_blu.route('/news_review_detail/<int:news_id>')
+def news_review_detail(news_id):
+    news = None
+    try:
+        news = News.query.get(news_id)
+    except Exception as e:
+        current_app.logger.error(e)
+
+    if not news:
+        return render_template('admin/news_review_detail.html', data={"errmsg": "未查询到此新闻"})
+
+    data={"news": news.to_dict()}
+    return render_template('admin/news_review_detail.html', data=data)
+
+
+@admin_blu.route('/news_review')
+def news_review():
+    page = request.args.get("p", 1)
+    keywords = request.args.get("keywords", None)
+    try:
+        page = int(page)
+    except Exception as e:
+        current_app.logger.error(e)
+        page = 1
+
+    filters = [News.status != 0]
+    # 如果关键字存在，就添加关键字搜索
+    if keywords:
+        filters.append(News.title.contains(keywords))
+
+    news_list = []
+    current_page = 1
+    total_page = 1
+
+    try:
+        paginate = News.query.filter(*filters).order_by(News.create_time.desc()).paginate(page, constants.ADMIN_NEWS_PAGE_MAX_COUNT, False)
+        news_list = paginate.items
+        current_page = paginate.page
+        total_page = paginate.pages
+    except Exception as e:
+        current_app.logger.error(e)
+
+    news_dict_list = []
+    for news in news_list:
+        news_dict_list.append(news.to_review_dict())
+    context = {
+        "total_page": total_page,
+        "current_page": current_page,
+        "news_list": news_dict_list
+        }
+
+    return render_template('admin/news_review.html', data=context)
 
 
 @admin_blu.route('/user_list')
