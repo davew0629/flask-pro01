@@ -14,12 +14,13 @@ from . import passport_blu
 from info.utils.captcha.captcha import captcha
 
 
-@passport_blu.route('/logout')
+@passport_blu.route('/logout', methods=['POST'])
 def logout():
     # 清除session的数据 退出登录
     session.pop('user_id', None)
     session.pop('nick_name', None)
     session.pop('mobile', None)
+    session.pop('is_admin', None)
     return jsonify(errno=RET.OK, errmsg="退出成功")
 
 
