@@ -135,6 +135,7 @@ def user_follow():
     return render_template('news/user_follow.html', data=data)
 
 
+# 当前用户发布的新闻列表展示
 @profile_blu.route('/news_list')
 @user_login_data
 def user_news_list():
@@ -168,12 +169,13 @@ def user_news_list():
     data = {
         "news_list": news_dict_li,
         "total_page": total_page,
-        "current_page": current_page,
+        "current_page": current_page
     }
 
     return render_template('news/user_news_list.html', data=data)
 
 
+# 用户发布新闻
 @profile_blu.route('/news_release', methods=["get", "post"])
 @user_login_data
 def news_release():
@@ -195,6 +197,7 @@ def news_release():
 
         return render_template('news/user_news_release.html', data={"categories": category_dict_li})
 
+    # 以下用户提交数据，使用post方法
     # 1. 获取要提交的数据
     # 标题
     title = request.form.get("title")
@@ -252,6 +255,7 @@ def news_release():
     return jsonify(errno=RET.OK, errmsg="OK")
 
 
+# 用户收藏信息展示
 @profile_blu.route('/collection')
 @user_login_data
 def user_collection():
@@ -293,6 +297,7 @@ def user_collection():
     return render_template('news/user_collection.html', data=data)
 
 
+# 密码校验
 @profile_blu.route('/pass_info', methods=["GET", "POST"])
 @user_login_data
 def pass_info():
@@ -326,7 +331,7 @@ def pic_info():
     if request.method == "GET":
         return render_template('news/user_pic_info.html', data={"user": user.to_dict()})
 
-    # post方法表示修改头像
+    # post方法，表示修改头像
     # 获取上传的图片
     try:
         avatar = request.files.get("avatar").read()
@@ -346,6 +351,7 @@ def pic_info():
     return jsonify(errno=RET.OK, errmsg="OK", data={"avatar_url": constants.QINIU_DOMIN_PREFIX + key})
 
 
+# 展示用户基本信息
 @profile_blu.route('/base_info', methods=["POST", "GET"])
 @user_login_data
 def base_info():
@@ -353,6 +359,7 @@ def base_info():
     if request.method == "GET":
         return render_template('news/user_base_info.html', data={"user": g.user.to_dict()})
 
+    # 修改用户数据，post方法传入数据
     # 取到传入参数
     nick_name = request.json.get("nick_name")
     signature = request.json.get("signature")
@@ -372,11 +379,13 @@ def base_info():
     return jsonify(errno=RET.OK, errmsg="OK")
 
 
+# 获取用户信息
 @profile_blu.route('/info')
 @user_login_data
 def user_info():
     user = g.user
     if not user:
+        # 没有登录，重定向到首页
         return redirect("/")
     data = {
         "user": user.to_dict()

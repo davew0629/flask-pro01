@@ -1,11 +1,13 @@
 from redis import StrictRedis
 
-import os, logging
+import os
+import logging
 basedir = os.path.abspath(os.path.dirname(__file__))
+
 
 class Config(object):
     # 项目的配置
-    DEBUG = True
+    # DEBUG = True
 
     SECRET_KEY = 'afLWSqolE06SiU0a2skKntN3q1LZBWcxVQdN2kv+6W3OazEpu8tnwk0WALKFJDir'
     # 为数据库添加配置
@@ -35,31 +37,32 @@ class Config(object):
 class DevelopmentConfig(Config):
     # 开发环境
     DEBUG = True
-    MAIL_SERVER = 'smtp.googlemail.com'
-    MAIL_PORT = 587
-    MAIL_USE_TLS = True
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
-                              'sqlite:///' + os.path.join(basedir, 'data-dev.sqlite')
+    # MAIL_SERVER = 'smtp.googlemail.com'
+    # MAIL_PORT = 587
+    # MAIL_USE_TLS = True
+    # MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    # MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    # SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
+    #                           'sqlite:///' + os.path.join(basedir, 'data-dev.sqlite')
 
 
 class TestingConfig(Config):
     # 测试环境
+    DEBUG = False
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or \
-                          'sqlite:///' + os.path.join(basedir, 'data-test.sqlite')
+    # SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or \
+    #                       'sqlite:///' + os.path.join(basedir, 'data-test.sqlite')
 
 
 class ProductionConfig(Config):
     # 生产环境
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-                          'sqlite:///' + os.path.join(basedir, 'data.sqlite')
+    DEBUG = False
     LOG_LEVEL = logging.WARNING
+    # SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+    #                       'sqlite:///' + os.path.join(basedir, 'data.sqlite')
 
 
 config = {
-    'default_config':Config,
     'development': DevelopmentConfig,
     'testing': TestingConfig,
     'production': ProductionConfig,

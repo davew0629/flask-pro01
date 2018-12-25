@@ -1,14 +1,45 @@
 from datetime import datetime, timedelta
 import time
-
 from flask import render_template, request, current_app, session, g, redirect, url_for, jsonify, abort
-
 from info import constants, db
 from info.models import User, News, Category
 from info.modules.admin import admin_blu
 from info.utils.common import user_login_data
 from info.utils.image_storage import storage
 from info.utils.response_code import RET
+
+
+@admin_blu.route('/news_delete')
+def news_delete():
+    news_id = request.json.get("news_id")
+
+    if not news_id:
+        abort(404)
+
+    try:
+        news_id = int(news_id)
+        print(news_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return render_template('admin/news_edit_detail.html', errmsg="参数错误")
+
+    try:
+        news = News.query.get(news_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return render_template('admin/news_edit_detail.html', errmsg="查询数据错误")
+
+    if not news:
+        return render_template('admin/news_edit_detail.html', errmsg="未查询到数据")
+    #
+    # try:
+    #     db.session.delete(news)
+    #     db.session.commit()
+    # except Exception as e:
+    #     current_app.logger.error(e)
+    #     db.session.rollback()
+    #     return jsonify(errno=RET.DBERR, errmsg="数据删除失败")
+    return jsonify(errno=RET.OK, errmsg="OK")
 
 
 @admin_blu.route('/news_type', methods=["POST", "GET"])
@@ -64,12 +95,12 @@ def news_edit_detail():
     """新闻编辑详情"""
     if request.method == "GET":
         news_id = request.args.get("news_id")
-
         if not news_id:
             abort(404)
 
         try:
             news_id = int(news_id)
+
         except Exception as e:
             current_app.logger.error(e)
             return render_template('admin/news_edit_detail.html', errmsg="参数错误")
@@ -117,9 +148,10 @@ def news_edit_detail():
     index_image = request.files.get("index_image")
     category_id = request.form.get("category_id")
 
+    print(news_id, title, digest, content, category_id)
     # 判断数据是否有值
     if not all([title, digest, content, category_id]):
-        return jsonify(errno=RET.PARAMERR, errmsg="参数有误")
+        return jsonify(errno=RET.PARAMERR, errmsg="参数有误01")
 
     # 查询指定id的新闻
     try:
@@ -316,7 +348,6 @@ def user_list():
 @admin_blu.route('/user_count')
 def user_count():
     # 总人数
-    print("开始调用user—count方法")
     total_count = 0
     try:
         total_count = User.query.filter(User.is_admin == False).count()

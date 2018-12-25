@@ -150,7 +150,7 @@ def comment_news():
         return jsonify(errno=RET.DBERR, errmsg="数据查询错误")
     if not news:
         return jsonify(errno=RET.NODATA, errmsg="未查询到数据错误")
-    print("准备获取comment")
+
     comment = Comment()  # 初始化一个评论模型并赋
     comment.user_id = user.id
     comment.content = comment_content
@@ -172,7 +172,6 @@ def comment_news():
 @news_blu.route("/<int:news_id>")
 @user_login_data
 def news_detail(news_id):
-    print('准备调用news_detail/news_id')
 
     # 定义变量作为是否收藏的标记
     is_collected = False
@@ -182,7 +181,6 @@ def news_detail(news_id):
     # 查询用户登陆信息
     # user = query_user_data()
     user = g.user
-
     news_list = []
     try:
         news_list = News.query.order_by(News.clicks.desc()).limit(constants.CLICK_RANK_MAX_NEWS)
@@ -206,7 +204,6 @@ def news_detail(news_id):
 
     # 更新新闻的点击次数
     news.clicks += 1
-    print("news.clicks: %d" % news.clicks)
 
     if user:
         # sqlalchemy会在使用的时候自动加载
@@ -214,12 +211,10 @@ def news_detail(news_id):
             is_collected = True
 
     comments = []
-    print("news_id: %s" % news_id)
     try:
         comments = Comment.query.filter(Comment.news_id == news_id).order_by(Comment.create_time.desc()).all()
     except Exception as e:
         current_app.logger.error(e)
-    print("comments : %s" % comments)
     comment_like_ids = []
     if user:
         try:
@@ -247,7 +242,6 @@ def news_detail(news_id):
         if news.user in user.followed:
             is_followed = True
 
-
     data = {
         "news": news.to_dict(),
         "user": user.to_dict() if user else None,
@@ -256,8 +250,7 @@ def news_detail(news_id):
         "comments": comment_dict_li,
         "is_followed": is_followed
     }
-    print("准备返回news_detail/news_id页面")
-    print(news)
+
     return render_template("news/detail.html", data=data)
 
 
