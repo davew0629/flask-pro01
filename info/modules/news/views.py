@@ -257,7 +257,7 @@ def news_detail(news_id):
 @news_blu.route("/news_collect", methods=['POST'])
 @user_login_data
 def collect_news():
-    print("准备调用collect_news收藏方法")
+
     user = g.user
     if not user:
         # 用户不是登录状态
@@ -294,5 +294,4 @@ def collect_news():
         if news not in user.collection_news:
             user.collection_news.append(news)
 
-    print("操作成功")
     return jsonify(errno=RET.OK, errmsg="收藏操作成功！")

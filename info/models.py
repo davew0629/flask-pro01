@@ -92,6 +92,7 @@ class User(BaseModel, db.Model):
         }
         return resp_dict
 
+
 class News(BaseModel, db.Model):
     """新闻"""
     __tablename__ = "info_news"

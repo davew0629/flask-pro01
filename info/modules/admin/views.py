@@ -148,7 +148,7 @@ def news_edit_detail():
     index_image = request.files.get("index_image")
     category_id = request.form.get("category_id")
 
-    print(news_id, title, digest, content, category_id)
+
     # 判断数据是否有值
     if not all([title, digest, content, category_id]):
         return jsonify(errno=RET.PARAMERR, errmsg="参数有误01")
@@ -341,7 +341,7 @@ def user_list():
         "total_page": total_page,
         "current_page": current_page
     }
-    print(total_page)
+
     return render_template('admin/user_list.html', data=data)
 
 

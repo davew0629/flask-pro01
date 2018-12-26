@@ -14,7 +14,6 @@ def news_list():
     page = request.args.get("page", "1")
     per_page = request.args.get("perpage", "10")
 
-    print(cid, page, per_page)
     try:
         cid = int(cid)
         page = int(page)
@@ -89,7 +88,6 @@ def index():
 
     # 显示右侧新闻排行
     news_list = []
-    print("准备获取新闻排行数据")
     try:
         news_list = News.query.order_by(News.clicks.desc()).limit(constants.CLICK_RANK_MAX_NEWS)
     except Exception as e:
@@ -98,7 +96,6 @@ def index():
     news_dict_li = []
     for news in news_list:
         news_dict_li.append(news.to_basic_dict())
-    print(len(news_dict_li))
 
     data = {
         "user": user.to_dict() if user else None,

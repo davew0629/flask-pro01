@@ -29,7 +29,6 @@ def get_image_code():
     # 3 生成图片验证码  使用三个参数接收
     # 4 保存图片验证码文字内容到redis
     # 5 返回验证码图片，并设置数据类型，以便浏览器识别其类型
-    print("准备调用get_iamge_code")
 
     image_code_id = request.args.get("imageCodeId", None)
 
@@ -39,14 +38,14 @@ def get_image_code():
 
     try:
         redis_store.set("ImageCodeId_" + image_code_id, text, constants.IMAGE_CODE_REDIS_EXPIRES)
-        print("保存到redis数据库")
+
     except Exception as e:
 
         current_app.logger.error(e)
         abort(500)
     response = make_response(image)
     response.headers["Content-Type"] = "image/jpg"
-    print("开始返回验证码图片")
+
     return response
 
 
@@ -66,7 +65,6 @@ def send_sms_code():
     '{"mobiel": "18811111111", "image_code": "AAAA", "image_code_id": "u23jksdhjfkjh2jh4jhdsj"}'
     # 1. 获取参数：手机号，图片验证码内容，图片验证码的编号 (随机值)
     # params_dict = json.loads(request.data)
-    print("准备接收图片验证码参数---用于获取用户输入参数")
     param_dict = request.json
 
     mobile = param_dict.get("mobile")
@@ -87,7 +85,7 @@ def send_sms_code():
     # 3. 先从redis中取出真实的验证码内容
     try:
         real_image_code = redis_store.get("ImageCodeId_" + image_code_id)
-        print("real_image_code:%s" % real_image_code)
+
 
     except Exception as e:
         current_app.logger.error(e)
@@ -139,7 +137,7 @@ def register():
     :return:
     """
     # 1. 获取参数
-    print("开始注册，获取注册信息")
+    # print("开始注册，获取注册信息")
     param_dict = request.json
     mobile = param_dict.get("mobile")
     smscode = param_dict.get("smscode")
@@ -156,8 +154,7 @@ def register():
     # 3. 取到服务器保存的真实的短信验证码内容
     try:
         real_sms_code = redis_store.get("SMS_" + mobile)
-        print(smscode)
-        print(real_sms_code)
+
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg="数据查询失败")
@@ -195,7 +192,7 @@ def register():
     session["nick_name"] = user.nick_name
 
     # 7. 返回响应
-    print("注册成功")
+
     return jsonify(errno=RET.OK, errmsg="注册成功")
 
 
@@ -252,5 +249,5 @@ def login():
     #     current_app.logger.error(e)
 
     # 5. 响应
-    print("登录成功， 返回响应")
+
     return jsonify(errno=RET.OK, errmsg="登录成功")
